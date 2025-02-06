@@ -1,0 +1,80 @@
+---
+title: "Practical One"
+author: "Sbonelo Gumede"
+date: "`r Sys.Date()`"
+format: 
+  pdf: 
+    code-fold: true
+    documentclass: article
+    include-in-header: 
+      text: |
+        \usepackage[margin=0.5in]{geometry}
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library("knitr")
+library("kableExtra")
+```
+
+## Air quality data set
+
+### Remove missing values
+
+```{r}
+data <- na.omit(airquality)
+```
+
+### Temperature statistics
+
+```{r}
+temp_df <- data.frame(Statistics = c("Mean", "Standard Deviation", "Minimum", "Maximum"), 
+			  Values = c(mean(data$Temp), sd(data$Temp), min(data$Temp), max(data$Temp)))
+knitr::kable(temp_df)
+```
+
+### Ozone level statistics
+
+```{r}
+ozone_df <- data.frame(Statistics = c("Mean", "Standard Deviation", "Minimum", "Maximum"), 
+				Values = c(mean(data$Ozone), sd(data$Ozone), min(data$Ozone), max(data$Ozone)))
+knitr::kable(ozone_df)
+```
+
+\newpage
+
+## Cars data set
+
+### Remove missing values
+
+```{r}
+cars <- na.omit (cars)
+```
+
+### Declare variables
+
+```{r}
+X <- cbind(1, cars$speed)
+Y <- cars$dist
+```
+
+### Calculate beta estimates
+
+```{r}
+beta_coefficients <- solve (t(X) %*% X) %*% t(X) %*% Y
+knitr::kable (beta_coefficients)
+```
+
+### Fit a linear model
+
+```{r}
+model <- lm (dist ~ speed, data = cars)
+```
+
+### Display the summary
+
+```{r}
+summary_table <- as.data.frame(summary(model)$coefficients)
+knitr::kable(summary_table, caption = "Model Coefficients")
+```
