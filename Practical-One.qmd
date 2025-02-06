@@ -20,13 +20,13 @@ library("kableExtra")
 
 ## Air quality data set
 
-### Remove missing values
+Remove missing values
 
 ```{r}
 data <- na.omit(airquality)
 ```
 
-### Temperature statistics
+Temperature statistics
 
 ```{r}
 temp_df <- data.frame(Statistics = c("Mean", "Standard Deviation", "Minimum", "Maximum"), 
@@ -34,7 +34,7 @@ temp_df <- data.frame(Statistics = c("Mean", "Standard Deviation", "Minimum", "M
 knitr::kable(temp_df)
 ```
 
-### Ozone level statistics
+Ozone level statistics
 
 ```{r}
 ozone_df <- data.frame(Statistics = c("Mean", "Standard Deviation", "Minimum", "Maximum"), 
@@ -46,33 +46,63 @@ knitr::kable(ozone_df)
 
 ## Cars data set
 
-### Remove missing values
+Remove missing values
 
 ```{r}
 cars <- na.omit (cars)
 ```
 
-### Declare variables
+Declare variables
 
 ```{r}
 X <- cbind(1, cars$speed)
 Y <- cars$dist
 ```
 
-### Calculate beta estimates
+Calculate beta estimates
 
 ```{r}
 beta_coefficients <- solve (t(X) %*% X) %*% t(X) %*% Y
 knitr::kable (beta_coefficients)
 ```
 
-### Fit a linear model
+```{r}
+B <- beta_coefficients
+n <- length(cars$speed)
+k <- 2
+df <- n-k
+```
+
+Calculate standard errors
+
+```{r}
+s_square <- (1/(df))* (t(Y - X%*%B) %*% (Y - X%*%B))
+C <- solve(t(X) %*% X)
+se <- sqrt(as.numeric(s_square) * diag(C))
+knitr::kable(se)
+```
+
+Calculate t-statistics
+
+```{r}
+t_stats <- B/se
+knitr::kable(t_stats)
+```
+
+Calculate p-values
+
+```{r}
+p_values <- 2 * (1 - pt(abs(t_stats), df = df))
+knitr::kable(p_values)
+```
+
+Fit a linear model
 
 ```{r}
 model <- lm (dist ~ speed, data = cars)
 ```
 
-### Display the summary
+Display the summary
 
 ```{r}
 summary_table <- as.data.frame(summary(model)$coefficients)
