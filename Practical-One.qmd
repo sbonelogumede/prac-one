@@ -1,7 +1,7 @@
 ---
 title: "Practical One"
-author: "Sbonelo Gumede"
-date: "`r Sys.Date()`"
+author: "Sbonelo Gumede \n GMDSBO006"
+date: "`r Sys.Date()`" 
 format: 
   pdf: 
     code-fold: true
@@ -47,64 +47,53 @@ knitr::kable(ozone_df)
 ## Cars data set
 
 Remove missing values
-
 ```{r}
-cars <- na.omit (cars)
+cars <- na.omit(cars)
 ```
 
-Declare variables
+First principle calculations function
+
+```{r}
+f <- function(X, Y){
+# Calculate beta estimates
+B <- solve (t(X) %*% X) %*% t(X) %*% Y
+
+n <- length(cars$speed)
+k <- 2
+df <- n-k
+
+# Calculate standard errors
+s_square <- (1/(df))* (t(Y - X%*%B) %*% (Y - X%*%B))
+C <- solve(t(X) %*% X)
+se <- sqrt(as.numeric(s_square) * diag(C))
+
+# Calculate t-statistics
+t_stats <- B/se
+
+# Calculate p-values
+p_values <- 2 * (1 - pt(abs(t_stats), df = df))
+
+data_frame <- data.frame("Estimate"=B, "Std. Error"=se, "t value"=t_stats, "Pr(>|t|)"=p_values, 
+								 check.names=FALSE)
+row.names(data_frame) <-  c("(Intercept)", "speed")
+return(data_frame)
+}
+```
+
+Using the `first principle calculations` function
 
 ```{r}
 X <- cbind(1, cars$speed)
 Y <- cars$dist
+knitr::kable(f(X, Y))
 ```
 
-Calculate beta estimates
-
+Using the `lm` function
 ```{r}
-beta_coefficients <- solve (t(X) %*% X) %*% t(X) %*% Y
-knitr::kable (beta_coefficients)
-```
-
-```{r}
-B <- beta_coefficients
-n <- length(cars$speed)
-k <- 2
-df <- n-k
-```
-
-Calculate standard errors
-
-```{r}
-s_square <- (1/(df))* (t(Y - X%*%B) %*% (Y - X%*%B))
-C <- solve(t(X) %*% X)
-se <- sqrt(as.numeric(s_square) * diag(C))
-knitr::kable(se)
-```
-
-Calculate t-statistics
-
-```{r}
-t_stats <- B/se
-knitr::kable(t_stats)
-```
-
-Calculate p-values
-
-```{r}
-p_values <- 2 * (1 - pt(abs(t_stats), df = df))
-knitr::kable(p_values)
-```
-
-Fit a linear model
-
-```{r}
+# Fit a linear model
 model <- lm (dist ~ speed, data = cars)
-```
 
-Display the summary
-
-```{r}
+# Display the summary
 summary_table <- as.data.frame(summary(model)$coefficients)
-knitr::kable(summary_table, caption = "Model Coefficients")
+knitr::kable(summary_table)
 ```
