@@ -23,6 +23,9 @@ library("kableExtra")
 Remove missing values
 
 ```{r}
+# Rows with NA
+knitr::kable(airquality[rowSums(is.na(airquality)) > 0, ])
+# Remove rows with NA
 data <- na.omit(airquality)
 ```
 
