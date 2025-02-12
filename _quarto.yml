@@ -1,5 +1,23 @@
 project:
-  title: "Practical One"
+  type: website
+
+website:
+  title: "GMDSBO006"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: prac1.qmd
+        text: Practical One
+      - href: prac2.qmd
+        text: Practical Two
+      - href: prac3.qmd
+        text: Practical Three
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
 
 editor: visual
-

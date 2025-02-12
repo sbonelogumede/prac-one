@@ -1,0 +1,96 @@
+---
+title: "Practical One"
+author: "Sbonelo Gumede \n GMDSBO006"
+date: "`r Sys.Date()`" 
+format: html
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+library("knitr")
+library("kableExtra")
+
+opts_chunk$set(echo = TRUE)
+```
+
+## Air quality data set
+
+Remove missing values
+
+```{r}
+# Rows with NA
+kable(airquality[rowSums(is.na(airquality)) > 0, ])
+# Remove rows with NA
+data <- na.omit(airquality)
+```
+
+Temperature statistics
+
+```{r}
+temp_df <- data.frame(Statistics = c("Mean", "Standard Deviation", "Minimum", "Maximum"), 
+			  Values = c(mean(data$Temp), sd(data$Temp), min(data$Temp), max(data$Temp)))
+kable(temp_df)
+```
+
+Ozone level statistics
+
+```{r}
+ozone_df <- data.frame(Statistics = c("Mean", "Standard Deviation", "Minimum", "Maximum"), 
+				Values = c(mean(data$Ozone), sd(data$Ozone), min(data$Ozone), max(data$Ozone)))
+kable(ozone_df)
+```
+
+\newpage
+
+## Cars data set
+
+Remove missing values
+```{r}
+cars <- na.omit(cars)
+```
+
+First principle calculations function
+
+```{r}
+f <- function(X, Y){
+# Calculate beta estimates
+B <- solve (t(X) %*% X) %*% t(X) %*% Y
+
+n <- length(cars$speed)
+k <- 2
+df <- n-k
+
+# Calculate standard errors
+s_square <- (1/(df))* (t(Y - X%*%B) %*% (Y - X%*%B))
+C <- solve(t(X) %*% X)
+se <- sqrt(as.numeric(s_square) * diag(C))
+
+# Calculate t-statistics
+t_stats <- B/se
+
+# Calculate p-values
+p_values <- 2 * (1 - pt(abs(t_stats), df = df))
+
+data_frame <- data.frame("Estimate"=B, "Std. Error"=se, "t value"=t_stats, "Pr(>|t|)"=p_values, 
+								 check.names=FALSE)
+row.names(data_frame) <-  c("(Intercept)", "speed")
+return(data_frame)
+}
+```
+
+Using the `first principle calculations` function
+
+```{r}
+X <- cbind(1, cars$speed)
+Y <- cars$dist
+kable(f(X, Y))
+```
+
+Using the `lm` function
+```{r}
+# Fit a linear model
+model <- lm (dist ~ speed, data = cars)
+
+# Display the summary
+summary_table <- as.data.frame(summary(model)$coefficients)
+kable(summary_table)
+```

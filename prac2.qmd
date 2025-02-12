@@ -1,0 +1,60 @@
+---
+title: "Practical Two"
+author: "Sbonelo Gumede \n GMDSBO006"
+date: "`r Sys.Date()`" 
+format: html
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+library("dplyr")
+library("ggplot2")
+library("knitr")
+library("magrittr")
+
+opts_chunk$set(echo = TRUE)
+```
+
+Implement the LOWESS Algorithm
+```{r}
+customLowess <- function(x, y, f){
+	n <- length(x) # Number of rows of x
+	k <- ceiling(f * n) # Calculate span
+	fitted_y <- numeric(n) # Stores the smoothed values
+	
+	# Loop through all the points
+	for(i in 1:n) {
+		distances <- abs(x - x[i]) # Calculate the distances
+		indices <- order(distances)[1:k] # Get the nearest k points indices
+		w <- (1 - (distances[indices] / max(distances[indices]))^3)^3 # Calculate the weights for all nearest points
+	
+		# Regression
+		X <- cbind(1, x[indices])
+		Y <- y[indices]
+		W <- diag(w)
+		B <- solve(t(X) %*% W %*% X) %*% t(X) %*% W %*% Y
+		fitted_y[i] <- c(1, x[i]) %*% B
+	}
+	return(fitted_y)
+}
+```
+
+Generate Simulated Data
+```{r}
+set.seed(1)
+
+x <- 1:100
+e <- rnorm(100, mean=0, sd=0.2)
+y <- sin(x/10) + e
+
+original_data <- data.frame(x=x, y=y)
+custom_data <- data.frame(x=x, y=customLowess(x=x, y=y, f=2/3))
+r_data <- data.frame(lowess(x=x, y=y, f=2/3, iter=0))
+
+ggplot() +
+  geom_point(data = original_data, aes(x, y, color = "Original")) + 
+  geom_line(data = custom_data, aes(x, y, color = "Custom LOWESS"), linewidth = 1, linetype = "dashed") +
+  geom_line(data = r_data, aes(x, y, color = "R LOWESS"), linewidth = 2, linetype = "dotted") +
+  scale_color_manual(values = c("Original" = "lightblue", "Custom LOWESS" = "black", "R LOWESS" = "lightcoral")) + 
+  labs(title = "LOWESS Smoothing Plots", x = "X Values", y = "Y Values", color = "Legend") +
+  theme_minimal()
+```
